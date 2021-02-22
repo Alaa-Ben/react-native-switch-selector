@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import {
   Animated,
@@ -24,7 +24,7 @@ const styles = {
   },
 };
 
-export default class SwitchSelector extends Component {
+export default class SwitchSelector extends PureComponent {
   constructor(props) {
     super(props);
     const { initial, options } = props;
@@ -56,10 +56,10 @@ export default class SwitchSelector extends Component {
   }
 
   getSwipeDirection(gestureState) {
-    const { dx, dy, vx } = gestureState;
+    const { dx, dy, vy } = gestureState;
     // 0.1 velocity
-    if (Math.abs(vx) > 0.1 && Math.abs(dy) < 80) {
-      return dx > 0 ? 'RIGHT' : 'LEFT';
+    if (Math.abs(vy) > 0.1 && Math.abs(dx) < 80) {
+      return dy > 0 ? 'UP' : 'DOWN';
     }
     return null;
   }
@@ -80,11 +80,11 @@ export default class SwitchSelector extends Component {
     if (disabled) return;
     const swipeDirection = this.getSwipeDirection(gestureState);
     if (
-      swipeDirection === 'RIGHT'
+      swipeDirection === 'UP'
       && selected < options.length - 1
     ) {
       this.toggleItem(selected + 1);
-    } else if (swipeDirection === 'LEFT' && selected > 0) {
+    } else if (swipeDirection === 'DOWN' && selected > 0) {
       this.toggleItem(selected - 1);
     }
   };
@@ -145,7 +145,7 @@ export default class SwitchSelector extends Component {
       options,
     } = this.props;
 
-    const { selected, sliderWidth } = this.state;
+    const { selected, sliderHeight } = this.state;
 
     const optionsMap = options.map((element, index) => {
       const isSelected = selected === index;
@@ -195,7 +195,7 @@ export default class SwitchSelector extends Component {
     });
 
     return (
-      <View style={[{ flexDirection: 'row' }, style]}>
+      <View style={[{ flexDirection: 'column' }, style]}>
         <View {...this.panResponder.panHandlers} style={{ flex: 1 }}>
           <View
             style={{
@@ -204,41 +204,39 @@ export default class SwitchSelector extends Component {
               height: height + buttonMargin * 2,
             }}
             onLayout={(event) => {
-              const { width } = event.nativeEvent.layout;
+              const { height } = event.nativeEvent.layout;
               this.setState({
-                sliderWidth: width - (hasPadding ? 2 : 0),
+                sliderHeight: height - (hasPadding ? 2 : 0),
               });
             }}
           >
             <View
               style={{
                 flex: 1,
-                flexDirection: 'row',
+                flexDirection: 'column',
                 borderColor,
                 borderRadius,
                 borderWidth: hasPadding ? borderWidth : 0,
                 alignItems: 'center',
               }}
             >
-              {!!sliderWidth && (
+              {!!sliderHeight && (
                 <Animated.View
                   style={[
                     {
-                      height: hasPadding
-                        ? height - valuePadding * 2 - borderWidth * 2
-                        : height,
+                      width: '100%',
                       backgroundColor: this.getBgColor(),
-                      width:
-                        sliderWidth / options.length
+                      height:
+                        sliderHeight / options.length
                         - ((hasPadding ? valuePadding : 0) + buttonMargin * 2),
                       transform: [
                         {
-                          translateX: this.animatedValue.interpolate({
+                          translateY: this.animatedValue.interpolate({
                             inputRange: [0, 1],
                             outputRange: [
                               hasPadding ? valuePadding : 0,
-                              sliderWidth
-                                - (hasPadding ? valuePadding : 0),
+                              sliderHeight
+                              - (hasPadding ? valuePadding : 0),
                             ],
                           }),
                         },
