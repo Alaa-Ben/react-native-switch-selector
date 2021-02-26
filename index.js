@@ -313,6 +313,6 @@ SwitchSelector.propTypes = {
   disabled: PropTypes.bool,
   disableValueChangeOnPress: PropTypes.bool,
   initial: PropTypes.number,
-  value: PropTypes.number,
+  value: PropTypes.any,
   onPress: PropTypes.func,
 };
